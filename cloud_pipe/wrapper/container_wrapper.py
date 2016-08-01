@@ -1,4 +1,5 @@
 import json
+import argparse
 import sys
 import os
 import errno
@@ -108,35 +109,37 @@ def describe_algorithm():
         'Please input the number of CPUs used for this algorithm. You can omit this if you already suggested an instance type.\n', 1)
 
     info['user_specified_environment_variables'] = []
-    addmore = True
-    while addmore:
-        helper = {}
-        helper['name'] = input(
-            'Please input the variable name you open to user:\n')
-        helper['required'] = get_true_or_false(
-            'Is this a required variable? [y/n]: ')
-        addmore = get_true_or_false(
-            'Do you want to add more variables? [y/n]: ')
-        info['user_specified_environment_variables'].append(helper)
+    if get_true_or_false('Do you want to add variables you open to user? [y/n]'):
+        addmore = True
+        while addmore:
+            helper = {}
+            helper['name'] = input(
+                'Please input the variable name you open to user:\n')
+            helper['required'] = get_true_or_false(
+                'Is this a required variable? [y/n]: ')
+            addmore = get_true_or_false(
+                'Do you want to add more variables? [y/n]: ')
+            info['user_specified_environment_variables'].append(helper)
 
     info['port'] = []
-    addmore = True
-    while addmore:
-        helper = {}
-        response = ''
-        port = get_int(
-            'Please input the port number you open to user:\n', None)
-        if port in info['port']:
-            print('This port number has already been set\n')
-            continue
-        helper['port'] = port
-        while response != 'tcp' and response != 'udp':
-            response = input(
-                'Please input the protocol of the port: [tcp/udp]\n')
-        helper['protocol'] = response
-        addmore = get_true_or_false(
-            'Do you want to add more ports? [y/n]:')
-        info['port'].append(helper)
+    if get_true_or_false('Do you want to open port to user? [y/n]'):
+        addmore = True
+        while addmore:
+            helper = {}
+            response = ''
+            port = get_int(
+                'Please input the port number you open to user:\n', None)
+            if port in info['port']:
+                print('This port number has already been set\n')
+                continue
+            helper['port'] = port
+            while response != 'tcp' and response != 'udp':
+                response = input(
+                    'Please input the protocol of the port: [tcp/udp]\n')
+            helper['protocol'] = response
+            addmore = get_true_or_false(
+                'Do you want to add more ports? [y/n]:')
+            info['port'].append(helper)
 
     # print(json.dumps(info, indent='    '))
 
@@ -246,30 +249,58 @@ def generate_image_info(alg_info, container_name):
     return alg_info
 
 
+def generate_all(alg, args):
+    '''
+    '''
+    wrapper(alg)
+
+    container_name = generate_image(alg['name'])
+
+    info = generate_image_info(alg, container_name)
+
+    name = container_name.split('/')[-1] + '_info.json'
+
+    with open('../algorithms/' + name, 'w') as data_file:
+        json.dump(info, data_file, indent='    ', sort_keys=True)
+
+    print('Successfully wrap container {}'.format(container_name))
+
+
 if __name__ == '__main__':
-    if len(sys.argv) < 2:
-        print('please input at least one file')
+    DEFAULT_USER = 'wangyx2005'
+
+parser = argparse.ArgumentParser(description='A tool to wrap your containers')
+
+parser.add_argument('-d', '--describe', action='store_true',
+                    help='use command line editor to describe your algorithm')
+parser.add_argument('-f', '--files', nargs='?',
+                    help='List json files to describe your algorithms')
+parser.add_argument('-s', '--show', action='store_true',
+                    help='show described algorithm before generate new container')
+parser.add_argument('-u', '--user', action='store', default=DEFAULT_USER,
+                    help='user name of docker hub account, default is {}'.format(DEFAULT_USER))
+
+args = parser.parse_args()
+
+if args.describe is True and args.files is not None or \
+        args.describe is False and args.files is None:
+    print('please use either -d or -f flag')
+    exit(0)
+
+if args.describe:
+    alg = describe_algorithm()
+
+    if args.show:
+        print(json.dumps(alg, indent='    '))
+
+    if not get_true_or_false('Do you want to continue? [y/n]:', True):
         exit(0)
 
-    if sys.argv[1] == '-d':
-        describe_algorithm()
-        exit(0)
-    elif sys.argv[1] == '-t':
-        print(get_int('', None))
-        exit(0)
+    generate_all(alg, args)
 
-    for file_name in sys.argv[1:]:
+else:
+    for file_name in args.files:
         with open(file_name, 'r') as data_file:
             alg = json.load(data_file)
-        wrapper(alg)
 
-        container_name = generate_image(alg['name'])
-
-        info = generate_image_info(alg, container_name)
-
-        name = container_name.split('/')[-1] + '_info.json'
-
-        with open('../algorithms/' + name, 'w') as data_file:
-            json.dump(info, data_file, indent='    ', sort_keys=True)
-
-        print('Successfully wrap container {}'.format(container_name))
+        generate_all(alg, args)
