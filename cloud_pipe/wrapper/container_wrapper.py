@@ -7,7 +7,7 @@ from subprocess import call
 SUPPORTED_SYSTEM = {'ubuntu'}
 
 
-def _generate_dockerfile(system_name, container_name):
+def generate_dockerfile(system_name, container_name):
     '''
     generate the dockerfile content
     '''
@@ -18,10 +18,10 @@ def _generate_dockerfile(system_name, container_name):
 
 
 def show_dockerfile(system_name, container_name):
-    print(_generate_dockerfile(system_name, container_name))
+    print(generate_dockerfile(system_name, container_name))
 
 
-def _generate_runscript(input_path, output_path, name, command):
+def generate_runscript(input_path, output_path, name, command):
     '''
     generate runscript that fetch information from sqs, handling
     download/upload file
@@ -32,10 +32,10 @@ def _generate_runscript(input_path, output_path, name, command):
 
 
 def show_runscript(input_path, output_path, name, command):
-    print(_generate_runscript(input_path, output_path, name, command))
+    print(generate_runscript(input_path, output_path, name, command))
 
 
-def _get_true_or_false(message, default=False):
+def get_true_or_false(message, default=False):
     '''
     transfer user input Y/n into True or False
 
@@ -57,7 +57,7 @@ def _get_true_or_false(message, default=False):
         return default
 
 
-def _get_int(message, default):
+def get_int(message, default):
     '''
     transfer user input to int numbers. Continue asking unless valid input.
     If user omit the input and default is set to non-None, get default number instand.
@@ -100,11 +100,11 @@ def describe_algorithm():
         'Please input one instance type on aws best fit running your algorithm. You can omit this:\n')
 
     info['memory'] = {}
-    info['memory']['minimal'] = _get_int(
+    info['memory']['minimal'] = get_int(
         'Please input the minimal memory requirement for running your algorithm in MB. You can omit this\n', 4)
-    info['memory']['suggested'] = _get_int(
+    info['memory']['suggested'] = get_int(
         'Please input the suggested memory requirement for running your algorithm in MB:\n', None)
-    info['CPU'] = _get_int(
+    info['CPU'] = get_int(
         'Please input the number of CPUs used for this algorithm. You can omit this if you already suggested an instance type.\n', 1)
 
     info['user_specified_environment_variables'] = []
@@ -113,9 +113,9 @@ def describe_algorithm():
         helper = {}
         helper['name'] = input(
             'Please input the variable name you open to user:\n')
-        helper['required'] = _get_true_or_false(
+        helper['required'] = get_true_or_false(
             'Is this a required variable? [y/n]: ')
-        addmore = _get_true_or_false(
+        addmore = get_true_or_false(
             'Do you want to add more variables? [y/n]: ')
         info['user_specified_environment_variables'].append(helper)
 
@@ -124,7 +124,7 @@ def describe_algorithm():
     while addmore:
         helper = {}
         response = ''
-        port = _get_int(
+        port = get_int(
             'Please input the port number you open to user:\n', None)
         if port in info['port']:
             print('This port number has already been set\n')
@@ -134,11 +134,11 @@ def describe_algorithm():
             response = input(
                 'Please input the protocol of the port: [tcp/udp]\n')
         helper['protocol'] = response
-        addmore = _get_true_or_false(
+        addmore = get_true_or_false(
             'Do you want to add more ports? [y/n]:')
         info['port'].append(helper)
 
-    print(json.dumps(info, indent='    '))
+    # print(json.dumps(info, indent='    '))
 
     return info
 
@@ -163,7 +163,7 @@ def wrapper(alg_info):
             raise
 
     # generate runscript
-    runscript = _generate_runscript(alg_info['input_file_path'], alg_info[
+    runscript = generate_runscript(alg_info['input_file_path'], alg_info[
                                     'output_file_path'], alg_info['name'],
                                     alg_info['run_command'])
     with open(alg_info['name'] + '/runscript.py', 'w+') as tmpfile:
@@ -173,14 +173,14 @@ def wrapper(alg_info):
     if alg_info['system'] not in SUPPORTED_SYSTEM:
         print("not support %s yet." % alg_info['system'])
         return
-    dockerfile = _generate_dockerfile(
+    dockerfile = generate_dockerfile(
         alg_info['system'], alg_info['container_name'])
 
     with open(alg_info['name'] + '/Dockerfile', 'w+') as tmpfile:
         tmpfile.write(dockerfile)
 
 
-def _get_instance_type(alg_info):
+def get_instance_type(alg_info):
     '''
     Based on the algorithm developer provided information, choose an
     apporperate ec2 instance_type
@@ -189,7 +189,7 @@ def _get_instance_type(alg_info):
     return 't2.micro'
 
 
-def _generate_image(folder_name, user):
+def generate_image(folder_name, user='wangyx2005'):
     '''
     build new docker image and upload, return new images
     '''
@@ -217,7 +217,7 @@ def _generate_image(folder_name, user):
     return tagged_name
 
 
-def _generate_image_info(alg_info, container_name):
+def generate_image_info(alg_info, container_name):
     '''
     generate wrapped image info for ecs task
     para: alg_info:
@@ -241,7 +241,7 @@ def _generate_image_info(alg_info, container_name):
 
     alg_info['container_name'] = container_name
     if alg_info['instance_type'] == '':
-        alg_info['instance_type'] = _get_instance_type(alg_info)
+        alg_info['instance_type'] = get_instance_type(alg_info)
     alg_info['user_specified_environment_variables'].extend(new_vars)
     return alg_info
 
@@ -249,12 +249,13 @@ def _generate_image_info(alg_info, container_name):
 if __name__ == '__main__':
     if len(sys.argv) < 2:
         print('please input at least one file')
+        exit(0)
 
     if sys.argv[1] == '-d':
         describe_algorithm()
         exit(0)
     elif sys.argv[1] == '-t':
-        print(_get_int('', None))
+        print(get_int('', None))
         exit(0)
 
     for file_name in sys.argv[1:]:
@@ -262,13 +263,13 @@ if __name__ == '__main__':
             alg = json.load(data_file)
         wrapper(alg)
 
-        container_name = _generate_image(alg['name'])
+        container_name = generate_image(alg['name'])
 
-        info = _generate_image_info(alg, container_name)
+        info = generate_image_info(alg, container_name)
 
         name = container_name.split('/')[-1] + '_info.json'
 
         with open('../algorithms/' + name, 'w') as data_file:
             json.dump(info, data_file, indent='    ', sort_keys=True)
 
-        print('Successfully wrap given container')
+        print('Successfully wrap container {}'.format(container_name))
