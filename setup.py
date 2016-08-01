@@ -6,6 +6,11 @@ setup(name='cloud_pipe',
       url='https://github.com/wangyx2005/cloud_pipe.git',
       author='Yuxing Wang',
       author_email='wangyx2005@gmail.com',
-      packages=['cloud_pipe'],
+      packages=['cloud_pipe', 'cloud_pipe.wrapper', 'cloud_pipe.pipeline'],
       install_requires=['boto3', 'Haikunator'],
+      scripts=[],
+      entry_points={
+        'console_scripts': ['wrap=cloud_pipe.wrapper.container_wrapper']
+      },
+      include_package_data=True,
       zip_safe=False)
