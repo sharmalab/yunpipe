@@ -10,6 +10,7 @@ from haikunator import Haikunator
 
 from image_class import image
 from cloud_pipe.pipeline.config import generate_session
+from cloud_pipe.pipeline.task_config import get_task_credentials
 
 USER_CREDENTIAL, session = generate_session()
 
@@ -561,4 +562,5 @@ def main(user_request, credentials):
 if __name__ == '__main__':
     with open(sys.argv[1], 'r') as tmpfile:
         user_request = json.load(tmpfile)
-    main(user_request)
+    credentials = get_task_credentials()
+    main(user_request, credentials)
