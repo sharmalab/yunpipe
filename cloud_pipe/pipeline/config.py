@@ -58,6 +58,9 @@ def check_user_aws_credential(AWS_CREDENTIAL_FILE_NAME, AWS_FOLDER):
 
         aws_access_key_id = input('AWS ACCESS KEY ID: ')
         aws_secret_access_key = input('AWS SECRET ACCESS KEY: ')
+        config.add_section('default')
+        config.set('default', 'aws_access_key_id', aws_access_key_id)
+        config.set('default', 'aws_secret_access_key', aws_secret_access_key)
         with open(AWS_CREDENTIAL_FILE_NAME, 'a+') as tmpfile:
             config.write(tmpfile)
     else:
@@ -86,6 +89,9 @@ def get_user_aws_config(AWS_CONFIG_FILE_NAME, AWS_FOLDER):
         region = input(
             'Default region name [us-east-1]: ', default='us-east-1')
         output = input('Default output format [json]: ', default='json')
+        config.add_section('default')
+        config.set('default', 'region', region)
+        config.set('default', 'output', output)
         with open(AWS_CONFIG_FILE_NAME, 'a+') as tmpfile:
             config.write(tmpfile)
     else:
