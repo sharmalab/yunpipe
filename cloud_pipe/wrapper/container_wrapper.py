@@ -273,7 +273,7 @@ parser = argparse.ArgumentParser(description='A tool to wrap your containers')
 
 parser.add_argument('-d', '--describe', action='store_true',
                     help='use command line editor to describe your algorithm')
-parser.add_argument('-f', '--files', nargs='?',
+parser.add_argument('-f', '--files', nargs='+',
                     help='List json files to describe your algorithms')
 parser.add_argument('-s', '--show', action='store_true',
                     help='show described algorithm before generate new container')
@@ -291,7 +291,7 @@ if args.describe:
     alg = describe_algorithm()
 
     if args.show:
-        print(json.dumps(alg, indent='    '))
+        print(json.dumps(alg, indent='    ', sort_keys=True))
 
     if not get_true_or_false('Do you want to continue? [y/n]:', True):
         exit(0)
