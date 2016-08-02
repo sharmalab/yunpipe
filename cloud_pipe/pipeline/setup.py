@@ -64,14 +64,6 @@ LAMBDA_EXECUTION_ROLE_TRUST_POLICY = {
 }
 
 
-# TODO: rewrite
-def _get_task_credentials():
-    credentials = {}
-    credentials['AWS_DEFAULT_REGION'] = 'us-east-1'
-    credentials['AWS_DEFAULT_OUTPUT'] = 'json'
-
-    return credentials
-
 # SQS related
 
 
@@ -449,7 +441,7 @@ def scatter_all(prev_s3, later_lambda_list):
     _set_event(prev_s3, arn, 'lambda')
 
 
-def pipeline_setup(request, sys_info, clean):
+def pipeline_setup(request, sys_info, clean, credentials):
     '''
     receive a json format of request, set up one run instance including sqs,
     input/output s3, lambda, (cloudwatch shutdown alarm) and ecs task definition.
@@ -489,7 +481,6 @@ def pipeline_setup(request, sys_info, clean):
     info['variables']['NAME'] = request['name']
 
     # generate task definition
-    credentials = _get_task_credentials()
     task = _generate_task_definition(image, info, credentials)
     clean['task'].append(task['taskDefinition']['taskDefinitionArn'])
 
@@ -512,7 +503,7 @@ def pipeline_setup(request, sys_info, clean):
     clean['s3'].append(output_s3)
 
 
-def main(user_request):
+def main(user_request, credentials):
     '''
     parse the user_request json, then setup the whole thing
     para: user_request
@@ -539,7 +530,7 @@ def main(user_request):
         request['output_s3_name'] = user_request['output_s3_name']
         request['sqs'] = name_generator.haikunate()
         request['alarm_sqs'] = clean['cloudwatch']
-        pipeline_setup(request, sys_info, clean)
+        pipeline_setup(request, sys_info, clean, credentials)
     elif user_request['process']['type'] == 'sequence_run':
         s3_names = []
         s3_names.append(user_request['input_s3_name'])
@@ -554,7 +545,7 @@ def main(user_request):
             request['output_s3_name'] = s3_names[i + 1]
             request['sqs'] = name_generator.haikunate()
             request['alarm_sqs'] = clean['cloudwatch']
-            pipeline_setup(request, sys_info, clean)
+            pipeline_setup(request, sys_info, clean, credentials)
             i += 1
 
     # finish setup
