@@ -1,1 +1,2 @@
-include templates/*.txt
+include cloud_pipe/templates/*.txt
+include cloud_pipe/algorithms/
