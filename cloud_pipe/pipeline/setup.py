@@ -9,7 +9,9 @@ from botocore.exceptions import ClientError
 from haikunator import Haikunator
 
 from image_class import image
-from _config import *
+from cloud_pipe.pipeline.config import generate_session
+
+USER_CREDENTIAL, session = generate_session()
 
 WAIT_TIME = 5
 
@@ -62,12 +64,12 @@ LAMBDA_EXECUTION_ROLE_TRUST_POLICY = {
 }
 
 
+# TODO: rewrite
 def _get_task_credentials():
     credentials = {}
     credentials['AWS_DEFAULT_REGION'] = 'us-east-1'
     credentials['AWS_DEFAULT_OUTPUT'] = 'json'
-    credentials['AWS_ACCESS_KEY_ID'] = AWSAccessKeyId
-    credentials['AWS_SECRET_ACCESS_KEY'] = AWSSecretKey
+
     return credentials
 
 # SQS related
@@ -76,9 +78,11 @@ def _get_task_credentials():
 def _get_or_create_queue(name):
     '''
     get queue by name, if the queue doesnot exist, create one.
-    rtype: sqs.Queue
+
+    rtype: string
     '''
-    resource = boto3.resource('sqs')
+
+    resource = session.resource('sqs')
     if _is_sqs_exist(name):
         return resource.get_queue_by_name(QueueName=name).url
     else:
@@ -91,7 +95,7 @@ def _is_sqs_exist(name):
     para: name: sqs name
     type: string
     '''
-    queues = boto3.client('sqs').list_queues()
+    queues = session.client('sqs').list_queues()
     for queue in queues['QueueUrls']:
         if name in queue:
             if name == queue.split('/')[-1]:
@@ -100,7 +104,7 @@ def _is_sqs_exist(name):
 
 
 def _delete_queue(queue_url):
-    boto3.client('sqs').delete_queue(QueueUrl=queue_url)
+    session.client('sqs').delete_queue(QueueUrl=queue_url)
 
 
 def _add_permission_s3_sqs(queue, account_id):
@@ -144,7 +148,7 @@ def _is_s3_exist(name):
     '''
     check for existense
     '''
-    s3 = boto3.client('s3')
+    s3 = session.client('s3')
     for bucket in s3.list_buckets()['Buckets']:
         if name == bucket['Name']:
             return True
@@ -157,7 +161,7 @@ def _get_or_create_s3(name):
     rtype: string
     '''
     if not _is_s3_exist(name):
-        boto3.client('s3').create_bucket(Bucket=name)
+        session.client('s3').create_bucket(Bucket=name)
         print('create s3 bucket %s.' % name)
     else:
         print('find s3 bucket %s.' % name)
@@ -165,7 +169,7 @@ def _get_or_create_s3(name):
 
 
 def _add_permission_s3_lambda(s3_name, lambda_arn):
-    lm = boto3.client('lambda')
+    lm = session.client('lambda')
     source = 'arn:aws:s3:::' + s3_name
     func = lm.get_function(FunctionName=lambda_arn)['Configuration']
     lm.add_permission(FunctionName=func['FunctionName'], StatementId='Allow_s3_invoke', Action='lambda:InvokeFunction', Principal='s3.amazonaws.com', SourceArn=source)
@@ -197,7 +201,7 @@ def _set_event(name, event_arn, option):
 
     config = json.loads(config)
 
-    boto3.client('s3').put_bucket_notification_configuration(
+    session.client('s3').put_bucket_notification_configuration(
         Bucket=name, NotificationConfiguration=config)
 
     print('finish setup s3 bucket %s event notification' % name)
@@ -241,7 +245,7 @@ def _generate_task_definition(image_info, user_info, credentials):
     '''
     image_info.init_all_variables(user_info, credentials)
     task_def = image_info.generate_task()
-    task = boto3.client('ecs').register_task_definition(family=task_def[
+    task = session.client('ecs').register_task_definition(family=task_def[
         'family'], containerDefinitions=task_def['containerDefinitions'])
     # task name: task_def['family']
     return task
@@ -250,7 +254,7 @@ def _generate_task_definition(image_info, user_info, credentials):
 def _delete_task_definition(task):
     # should be wrong
     # TODO: find the correct way to delete task
-    boto3.client('ecs').deregister_task_definition(taskDefinition=task)
+    session.client('ecs').deregister_task_definition(taskDefinition=task)
 
 # iam
 
@@ -261,7 +265,7 @@ def _create_lambda_exec_role():
     sqs, start ec2 and register cloudwatch
     '''
     # create role
-    iam = boto3.client('iam')
+    iam = session.client('iam')
     policy = json.dumps(LAMBDA_EXECUTION_ROLE_TRUST_POLICY, sort_keys=True)
 
     try:
@@ -298,7 +302,7 @@ def _get_role_arn(role_name):
     '''
     '''
     try:
-        res = boto3.client('iam').get_role(RoleName=role_name)
+        res = session.client('iam').get_role(RoleName=role_name)
     except ClientError as e:
         print(e)
         print('Does not have role %s, make sure you have permission on creating iam role and run create_lambda_exec_role()', role_name)
@@ -364,7 +368,7 @@ def _create_lambda_func(zipname):
         code = tmpfile.read()
     name = name_generator.haikunate()
     role = _get_role_arn(LAMBDA_EXEC_ROLE_NAME)
-    res = boto3.client('lambda').create_function(FunctionName=name, Runtime='python2.7', Role=role, Handler='lambda_function.lambda_handler', Code={'ZipFile': code}, Timeout=LAMBDA_EXEC_TIME, MemorySize=128)
+    res = session.client('lambda').create_function(FunctionName=name, Runtime='python2.7', Role=role, Handler='lambda_function.lambda_handler', Code={'ZipFile': code}, Timeout=LAMBDA_EXEC_TIME, MemorySize=128)
 
     # TODO: also remove lambda_function.py
     os.remove(zipname)
@@ -373,7 +377,7 @@ def _create_lambda_func(zipname):
 
 
 def _deleta_lambda(name):
-    boto3.client('lambda').delete_function(FunctionName=name)
+    session.client('lambda').delete_function(FunctionName=name)
 
 
 # utilities for setting up the whole thing
