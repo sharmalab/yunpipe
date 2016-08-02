@@ -23,8 +23,6 @@ from configparser import ConfigParser
 
 import boto3.session
 
-config = ConfigParser()
-
 
 def find_user_config_path():
     if 'Windows' in os.environ['OS']:
@@ -40,7 +38,7 @@ def find_user_config_path():
     return AWS_FOLDER, AWS_CONFIG_FILE_NAME, AWS_CREDENTIAL_FILE_NAME
 
 
-def get_user_aws_credential(AWS_CREDENTIAL_FILE_NAME, AWS_FOLDER):
+def check_user_aws_credential(AWS_CREDENTIAL_FILE_NAME, AWS_FOLDER):
     '''
     get user credential in ~/.aws/credential folder. if there is not any,
     update that.
@@ -107,7 +105,7 @@ def generate_session():
     # get credentials
     if 'AWS_ACCESS_KEY_ID' not in os.environ or \
             'AWS_SECRET_ACCESS_KEY' not in os.environ:
-        aws_access_key_id, aws_secret_access_key = get_user_aws_credential(
+        aws_access_key_id, aws_secret_access_key = check_user_aws_credential(
             AWS_CREDENTIAL_FILE_NAME, AWS_FOLDER)
     else:
         aws_access_key_id = os.getenv('AWS_ACCESS_KEY_ID')
