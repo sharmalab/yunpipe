@@ -1,10 +1,8 @@
 import json
 from zipfile import ZipFile
-from time import sleep
 import sys
 import os
 
-import boto3
 from botocore.exceptions import ClientError
 from haikunator import Haikunator
 
