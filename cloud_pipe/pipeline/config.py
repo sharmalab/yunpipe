@@ -126,7 +126,13 @@ def generate_session():
     # print(region)
     # print(output)
 
-    return boto3.session.Session(
+    credentials = {}
+    credentials['AWS_DEFAULT_REGION'] = region
+    credentials['AWS_DEFAULT_OUTPUT'] = output
+    credentials['AWS_ACCESS_KEY_ID'] = aws_access_key_id
+    credentials['AWS_SECRET_ACCESS_KEY'] = aws_secret_access_key
+
+    return credentials, boto3.session.Session(
         aws_access_key_id=aws_access_key_id,
         aws_secret_access_key=aws_secret_access_key,
         region_name=region)
