@@ -1,0 +1,6 @@
+#!/usr/bin/env python
+
+import argparse
+
+from cloud_pipe.pipeline.setup import main
+
