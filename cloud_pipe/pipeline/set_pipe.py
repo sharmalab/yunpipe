@@ -348,7 +348,7 @@ def _create_deploy_package(lambda_code, zipname):
         run_file.write(lambda_code)
     with ZipFile(zipname, 'w') as codezip:
         codezip.write(file_path, arcname='lambda_function.py')
-    # os.remove(file_path)
+    os.remove(file_path)
 
 
 def _create_lambda_func(zipname):
@@ -367,7 +367,7 @@ def _create_lambda_func(zipname):
     res = session.client('lambda').create_function(FunctionName=name, Runtime='python2.7', Role=role, Handler='lambda_function.lambda_handler', Code={'ZipFile': code}, Timeout=LAMBDA_EXEC_TIME, MemorySize=128)
 
     # TODO: also remove lambda_function.py
-    # os.remove(zipname)
+    os.remove(zipname)
 
     return res['FunctionArn']
 
