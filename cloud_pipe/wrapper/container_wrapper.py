@@ -2,7 +2,6 @@ import json
 import argparse
 import os
 from os.path import join
-import errno
 from subprocess import call
 
 from .. import CLOUD_PIPE_TEMPLATES_FOLDER
