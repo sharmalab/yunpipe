@@ -12,6 +12,8 @@ import os
 import errno
 from configparser import ConfigParser
 
+
+from . import USER_CREDENTIAL 
 from ..utils import get_full_path
 
 

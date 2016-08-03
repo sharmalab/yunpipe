@@ -9,5 +9,10 @@ setup(name='cloud_pipe',
       packages=['cloud_pipe', 'cloud_pipe.wrapper', 'cloud_pipe.pipeline'],
       install_requires=['boto3', 'Haikunator'],
       scripts=['bin/wrap', 'bin/setup_pipe'],
+      entry_points = {
+            'console_scripts': [
+                  'clean=cloud_pipe.pipeline.cleanup.main'
+            ]
+      },
       include_package_data=True,
       zip_safe=False)

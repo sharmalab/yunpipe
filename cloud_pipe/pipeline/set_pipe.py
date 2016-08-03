@@ -7,10 +7,12 @@ from botocore.exceptions import ClientError
 from haikunator import Haikunator
 
 from .image_class import image
-from .config import generate_session
 from .task_config import get_task_credentials
+from . import session
+from .. import CLOUD_PIPE_ALGORITHM_FOLDER
+from .. import CLOUD_PIPE_TMP_FOLDER
+from .. import CLOUD_PIPE_TEMPLATES_FOLDER
 
-USER_CREDENTIAL, session = generate_session()
 
 WAIT_TIME = 5
 
@@ -320,7 +322,9 @@ def _generate_lambda(image, sys_info, request, task_name):
     lambda_para['task_name'] = task_name
     lambda_para.update(request)
     lambda_para.update(sys_info)
-    with open('../templates/lambda_run_task_template.txt', 'r') as tmpfile:
+    file_path = os.path.join(CLOUD_PIPE_TEMPLATES_FOLDER,
+            'lambda_run_task_template.txt')
+    with open(file_path, 'r') as tmpfile:
         lambda_func = tmpfile.read()
     return lambda_func % lambda_para
 
@@ -339,11 +343,12 @@ def _create_deploy_package(lambda_code, zipname):
     generate the deploy package
     '''
     # TODO: check correctness
-    with open('lambda_function.py', 'w+') as run_file:
+    file_path = os.path.join(CLOUD_PIPE_TMP_FOLDER, 'lambda_function.py')
+    with open(file_path, 'w+') as run_file:
         run_file.write(lambda_code)
     with ZipFile(zipname, 'w') as codezip:
-        codezip.write('lambda_function.py')
-    os.remove('lambda_function.py')
+        codezip.write(file_path, arcname='lambda_function.py')
+    # os.remove(file_path)
 
 
 def _create_lambda_func(zipname):
@@ -362,7 +367,7 @@ def _create_lambda_func(zipname):
     res = session.client('lambda').create_function(FunctionName=name, Runtime='python2.7', Role=role, Handler='lambda_function.lambda_handler', Code={'ZipFile': code}, Timeout=LAMBDA_EXEC_TIME, MemorySize=128)
 
     # TODO: also remove lambda_function.py
-    os.remove(zipname)
+    # os.remove(zipname)
 
     return res['FunctionArn']
 
@@ -384,7 +389,8 @@ def get_image_info(name):
     '''
     # TODO: need to be rewrite down the road
     file_name = name + '_info.json'
-    with open('../algorithms/' + file_name, 'r') as tmpfile:
+    file_path = os.path.join(CLOUD_PIPE_ALGORITHM_FOLDER, file_name)
+    with open(file_path, 'r') as tmpfile:
         info = image(json.load(tmpfile))
     return info
 
@@ -431,10 +437,13 @@ def scatter_all(prev_s3, later_lambda_list):
     lambda_list_string = lambda_list_string[:-2] + ']'
 
     # creating a lambda function that trigger other sequential functions
-    with open('../templates/scatter_all.txt', 'r') as tmpfile:
+    file_path = os.path.join(CLOUD_PIPE_TEMPLATES_FOLDER, 'scatter_all.txt')
+    with open(file_path, 'r') as tmpfile:
         lambda_code = tmpfile.read() % {'lambda_arn_list': lambda_list_string}
-    _create_deploy_package(lambda_code, 'scatter_all.zip')
-    arn = _create_lambda_func('scatter_all.zip')
+
+    zipname = os.path.join(CLOUD_PIPE_TMP_FOLDER, '/scatter_all.zip')
+    _create_deploy_package(lambda_code, zipname)
+    arn = _create_lambda_func(zipname)
 
     # set previous result s3 bucket to trigger newly created s3 bucket
     _set_event(prev_s3, arn, 'lambda')
@@ -488,7 +497,7 @@ def pipeline_setup(request, sys_info, clean, credentials):
     # set lambda
     code = _generate_lambda(image, sys_info, request, task['taskDefinition']['family'])
 
-    zipname = request['name'] + name_generator.haikunate() + '.zip'
+    zipname = os.path.join(CLOUD_PIPE_TMP_FOLDER, request['name'] + name_generator.haikunate() + '.zip')
     _create_deploy_package(code, zipname)
     lambda_arn = _create_lambda_func(zipname)
     clean['lambda'].append(lambda_arn)
@@ -553,7 +562,8 @@ def main(user_request, credentials):
     print('You will get your result at %s' % user_request['output_s3_name'])
     print('-----------------------------------------------------------')
 
-    with open('clean_up.json', 'w+') as tmpfile:
+    file_path = os.path.join(CLOUD_PIPE_TMP_FOLDER, 'clean_up.json')
+    with open(file_path, 'w+') as tmpfile:
         json.dump(clean, tmpfile, sort_keys=True, indent='    ')
 
 

@@ -1,7 +1,10 @@
 import json
+import os.path
 
 import boto3
 from botocore.exceptions import ClientError
+
+from .. import CLOUD_PIPE_TMP_FOLDER
 
 
 def _delete_queue(queue_url):
@@ -37,8 +40,9 @@ def _delete_lambda_log(lambda_arn):
     boto3.client('logs').delete_log_group(logGroupName=name)
 
 
-if __name__ == '__main__':
-    with open('clean_up.json', 'r') as tmpfile:
+def main():
+    file_path = os.path.join(CLOUD_PIPE_TMP_FOLDER, 'clean_up.json')
+    with open(file_path, 'r') as tmpfile:
         info = json.load(tmpfile)
 
     for sqs in info['sqs']:

@@ -10,12 +10,18 @@ parser = argparse.ArgumentParser(description='A tool to set up your pipeline')
 
 parser.add_argument('-uu', '--use_user_credential', action='store_true', help='use user credential to run ecs task, we suggest using a less privileged user for running ecs. For more information, see our docs')
 
-parser.add_argument('-f', '--file', action='store',
+parser.add_argument('-f', '--files', nargs='+',
                     help='json files to describe your work flow')
 
 args = parser.parse_args()
 
+if args.files is None:
+    print('you need to input at least one file')
+    exit(0)
+
 credentials = get_task_credentials(args.use_user_credential)
-with open(args.file, 'r') as tmpfile:
-    user_request = json.load(tmpfile)
-main(user_request, credentials)
+
+for file in args.files:
+    with open(file, 'r') as tmpfile:
+        user_request = json.load(tmpfile)
+    main(user_request, credentials)

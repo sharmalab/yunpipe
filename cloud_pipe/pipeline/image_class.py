@@ -1,6 +1,9 @@
 import json
+import os.path
 
 from haikunator import Haikunator
+
+from .. import CLOUD_PIPE_TEMPLATES_FOLDER
 
 name_generator = Haikunator()
 
@@ -105,7 +108,8 @@ class image:
         generate task definition from template
         '''
         # read template file
-        with open('../templates/ecs_task_definition_template.txt', 'r') as tmpfile:
+        file_path = os.path.join(CLOUD_PIPE_TEMPLATES_FOLDER, 'ecs_task_definition_template.txt')
+        with open(file_path, 'r') as tmpfile:
             template = json.load(tmpfile)
 
         template['family'] = self.name + name_generator.haikunate()
