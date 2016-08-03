@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(name='cloud_pipe',
-      version='0.0.1',
+      version='0.0.2',
       description='Automatic tool for setting up your image processing work flow on the cloud',
       url='https://github.com/wangyx2005/cloud_pipe.git',
       author='Yuxing Wang',

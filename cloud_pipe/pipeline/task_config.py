@@ -11,18 +11,8 @@ specify parameter use_user_credential to True
 import os
 import errno
 from configparser import ConfigParser
-from __init__ import USER_CREDENTIAL
 
-
-def get_config_path():
-    '''
-    Get the full path of '~/.cloud_pipe/config'
-    '''
-    if 'Windows' in os.environ['OS']:
-        CONFIG_PATH = os.environ['USERPROFILE'] + '\\.cloud_pipe\\task'
-    else:
-        CONFIG_PATH = os.environ['USERPROFILE'] + '/.cloud_pipe/task'
-    return CONFIG_PATH
+from ..utils import get_full_path
 
 
 def check_task_credential():
@@ -30,15 +20,16 @@ def check_task_credential():
     get the credential and configures stored in ~/.cloud_pipe/task, if there
     is not any, collect those inforamtions and saved in ~/.cloud_pipe
     '''
-    path = get_config_path()
+    folder = get_full_path('~/.cloud_pipe')
+    path = get_full_path('~/.cloud_pipe/task')
     config = ConfigParser()
     config.read(path)
     if 'default' not in config:
-        aws_access_key_id = input('AWS ACCESS KEY ID: ')
-        aws_secret_access_key = input('AWS SECRET ACCESS KEY: ')
+        aws_access_key_id = input('run task AWS ACCESS KEY ID: ')
+        aws_secret_access_key = input('run task AWS SECRET ACCESS KEY: ')
         region = input(
-            'Default region name [us-east-1]: ', default='us-east-1')
-        output = input('Default output format [json]: ', default='json')
+            'Default region name [us-east-1]: ')
+        output = input('Default output format [json]: ')
 
         config.add_section('default')
         config.set('default', 'aws_access_key_id', aws_access_key_id)
@@ -48,7 +39,7 @@ def check_task_credential():
 
         #
         try:
-            os.makedirs(path)
+            os.makedirs(folder)
         except OSError as e:
             if e.errno != errno.EEXIST:
                 raise

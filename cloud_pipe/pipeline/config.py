@@ -23,6 +23,8 @@ from configparser import ConfigParser
 
 import boto3.session
 
+from ..utils import get_full_path
+
 
 def find_user_config_path():
     if 'Windows' in os.environ['OS']:
@@ -87,8 +89,8 @@ def get_user_aws_config(AWS_CONFIG_FILE_NAME, AWS_FOLDER):
                 raise
 
         region = input(
-            'Default region name [us-east-1]: ', default='us-east-1')
-        output = input('Default output format [json]: ', default='json')
+            'Default region name [us-east-1]: ')
+        output = input('Default output format [json]: ')
         config.add_section('default')
         config.set('default', 'region', region)
         config.set('default', 'output', output)
@@ -106,7 +108,9 @@ def generate_session():
 
     rtype: boto3.session.Session() object
     '''
-    AWS_FOLDER, AWS_CONFIG_FILE_NAME, AWS_CREDENTIAL_FILE_NAME = find_user_config_path()
+    AWS_FOLDER = get_full_path('~/.aws') 
+    AWS_CONFIG_FILE_NAME = get_full_path('~/.aws/config')
+    AWS_CREDENTIAL_FILE_NAME = get_full_path('~/.aws/credentials')
 
     # get credentials
     if 'AWS_ACCESS_KEY_ID' not in os.environ or \

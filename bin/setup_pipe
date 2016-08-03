@@ -5,14 +5,12 @@ import json
 
 from cloud_pipe.pipeline.set_pipe import main
 from cloud_pipe.pipeline.task_config import get_task_credentials
-from cloud_pipe.pipeline.__init__ import session
-from cloud_pipe.pipeline.__init__ import USER_CREDENTIAL
 
-parser = argparse.ArgumentParser(description='')
+parser = argparse.ArgumentParser(description='A tool to set up your pipeline')
 
 parser.add_argument('-uu', '--use_user_credential', action='store_true', help='use user credential to run ecs task, we suggest using a less privileged user for running ecs. For more information, see our docs')
 
-parser.add_argument('-f', '--file', nargs='store',
+parser.add_argument('-f', '--file', action='store',
                     help='json files to describe your work flow')
 
 args = parser.parse_args()

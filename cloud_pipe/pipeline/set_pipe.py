@@ -6,9 +6,9 @@ import os
 from botocore.exceptions import ClientError
 from haikunator import Haikunator
 
-from image_class import image
-from cloud_pipe.pipeline.config import generate_session
-from cloud_pipe.pipeline.task_config import get_task_credentials
+from .image_class import image
+from .config import generate_session
+from .task_config import get_task_credentials
 
 USER_CREDENTIAL, session = generate_session()
 
