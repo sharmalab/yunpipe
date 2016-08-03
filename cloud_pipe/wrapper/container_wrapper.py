@@ -1,9 +1,15 @@
 import json
 import argparse
-import sys
 import os
+from os.path import join
 import errno
 from subprocess import call
+
+from .. import CLOUD_PIPE_TEMPLATES_FOLDER
+from .. import CLOUD_PIPE_TMP_FOLDER
+from .. import CLOUD_PIPE_ALGORITHM_FOLDER
+from .. import create_folder
+
 
 SUPPORTED_SYSTEM = {'ubuntu'}
 
@@ -27,7 +33,8 @@ def generate_runscript(input_path, output_path, name, command):
     generate runscript that fetch information from sqs, handling
     download/upload file
     '''
-    with open('../templates/runscript_template', 'r') as myfile:
+    file_path = join(CLOUD_PIPE_TEMPLATES_FOLDER, 'runscript_template')
+    with open(file_path, 'r') as myfile:
         script = myfile.read()
     return script % {'input': input_path, 'output': output_path, 'name': name, 'command': command}
 
@@ -159,17 +166,16 @@ def wrapper(alg_info):
         alg_info['output_file_path'] += '/'
 
     # create a folder with name for dockerfile & runscript
-    try:
-        os.makedirs(alg_info['name'])
-    except OSError as e:
-        if e.errno != errno.EEXIST:
-            raise
+    folder = join(CLOUD_PIPE_TMP_FOLDER, alg_info['name'])
+    create_folder(folder)
 
     # generate runscript
     runscript = generate_runscript(alg_info['input_file_path'], alg_info[
                                     'output_file_path'], alg_info['name'],
                                     alg_info['run_command'])
-    with open(alg_info['name'] + '/runscript.py', 'w+') as tmpfile:
+    
+    run_file = join(folder, 'runscript.py')
+    with open(run_file, 'w+') as tmpfile:
         tmpfile.write(runscript)
 
     # generate dockerfile
@@ -179,7 +185,8 @@ def wrapper(alg_info):
     dockerfile = generate_dockerfile(
         alg_info['system'], alg_info['container_name'])
 
-    with open(alg_info['name'] + '/Dockerfile', 'w+') as tmpfile:
+    docker_file = join(folder, 'Dockerfile')
+    with open(docker_file, 'w+') as tmpfile:
         tmpfile.write(dockerfile)
 
 
@@ -192,17 +199,16 @@ def get_instance_type(alg_info):
     return 't2.micro'
 
 
-def generate_image(folder_name, user='wangyx2005'):
+def generate_image(name, folder_path, user='wangyx2005'):
     '''
     build new docker image and upload, return new images
     '''
     # TODO: rewrite
     # PATH = '../algorithms/'
     # name = dockerfile_name.split('.')[0]
-    name = folder_name
     tagged_name = user + '/' + name
     BUILD_COMMAND = 'docker build -t %(name)s %(path)s/.' \
-        % {'name': name, 'path': folder_name}
+        % {'name': name, 'path': folder_path}
     TAG_COMMAND = 'docker tag %(name)s %(tag)s' % {
         'tag': tagged_name, 'name': name}
     UPLOAD_COMMAND = 'docker push %(tag)s' % {'tag': tagged_name}
@@ -249,18 +255,21 @@ def generate_image_info(alg_info, container_name):
     return alg_info
 
 
-def generate_all(alg, args):
+def generate_all(alg, args, user):
     '''
     '''
     wrapper(alg)
 
-    container_name = generate_image(alg['name'])
+    path = join(CLOUD_PIPE_TMP_FOLDER, alg['name'])
+    container_name = generate_image(alg['name'], path, user)
 
     info = generate_image_info(alg, container_name)
 
     name = container_name.split('/')[-1] + '_info.json'
 
-    with open('../algorithms/' + name, 'w') as data_file:
+    file_path = join(CLOUD_PIPE_ALGORITHM_FOLDER, name)
+
+    with open(file_path, 'w') as data_file:
         json.dump(info, data_file, indent='    ', sort_keys=True)
 
     print('Successfully wrap container {}'.format(container_name))
@@ -296,11 +305,11 @@ if __name__ == '__main__':
         if not get_true_or_false('Do you want to continue? [y/n]:', True):
             exit(0)
 
-        generate_all(alg, args)
+        generate_all(alg, args, user)
 
     else:
         for file_name in args.files:
             with open(file_name, 'r') as data_file:
                 alg = json.load(data_file)
 
-            generate_all(alg, args)
+            generate_all(alg, args, user)
