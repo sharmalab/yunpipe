@@ -105,7 +105,7 @@ class image:
         generate task definition from template
         '''
         # read template file
-        with open('ecs_task_definition_template.json', 'r') as tmpfile:
+        with open('../templates/ecs_task_definition_template.txt', 'r') as tmpfile:
             template = json.load(tmpfile)
 
         template['family'] = self.name + name_generator.haikunate()

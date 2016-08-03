@@ -320,7 +320,7 @@ def _generate_lambda(image, sys_info, request, task_name):
     lambda_para['task_name'] = task_name
     lambda_para.update(request)
     lambda_para.update(sys_info)
-    with open('lambda_run_task_template', 'r') as tmpfile:
+    with open('../templates/lambda_run_task_template.txt', 'r') as tmpfile:
         lambda_func = tmpfile.read()
     return lambda_func % lambda_para
 
@@ -431,7 +431,7 @@ def scatter_all(prev_s3, later_lambda_list):
     lambda_list_string = lambda_list_string[:-2] + ']'
 
     # creating a lambda function that trigger other sequential functions
-    with open('scatter_all', 'r') as tmpfile:
+    with open('../templates/scatter_all.txt', 'r') as tmpfile:
         lambda_code = tmpfile.read() % {'lambda_arn_list': lambda_list_string}
     _create_deploy_package(lambda_code, 'scatter_all.zip')
     arn = _create_lambda_func('scatter_all.zip')

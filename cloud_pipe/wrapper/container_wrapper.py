@@ -13,7 +13,7 @@ def generate_dockerfile(system_name, container_name):
     generate the dockerfile content
     '''
     if system_name == 'ubuntu':
-        with open('ubuntu_wrapper', 'r') as myfile:
+        with open('../templates/ubuntu_wrapper', 'r') as myfile:
             dockerfile = myfile.read()
     return dockerfile % {'container_name': container_name}
 
@@ -27,7 +27,7 @@ def generate_runscript(input_path, output_path, name, command):
     generate runscript that fetch information from sqs, handling
     download/upload file
     '''
-    with open('runscript_template', 'r') as myfile:
+    with open('../templates/runscript_template', 'r') as myfile:
         script = myfile.read()
     return script % {'input': input_path, 'output': output_path, 'name': name, 'command': command}
 
