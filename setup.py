@@ -1,18 +1,19 @@
-from setuptools import setup
+from setuptools import setup, find_packages
+
 
 setup(name='cloud_pipe',
-      version='0.0.2',
-      description='Automatic tool for setting up your image processing work flow on the cloud',
+      version='0.0.3.dev',
+      description='An Automatic tool for setting up your image processing work flow on the cloud',
       url='https://github.com/wangyx2005/cloud_pipe.git',
       author='Yuxing Wang',
       author_email='wangyx2005@gmail.com',
-      packages=['cloud_pipe', 'cloud_pipe.wrapper', 'cloud_pipe.pipeline'],
+      packages=find_packages(),
       install_requires=['boto3', 'Haikunator'],
-      scripts=['bin/wrap', 'bin/setup_pipe'],
-      entry_points = {
-            'console_scripts': [
-                  'clean=cloud_pipe.pipeline.cleanup.main'
-            ]
+      # scripts=['bin/wrap', 'bin/setup_pipe'],
+      entry_points={
+          'console_scripts': ['wrap = cloud_pipe.scripts.wrap:main',
+                              'clean = cloud_pipe.pipeline.cleanup:main',
+                              'setup-pipe = cloud_pipe.scripts.setup_pipe:main']
       },
       include_package_data=True,
       zip_safe=False)
