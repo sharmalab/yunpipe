@@ -252,7 +252,7 @@ def _delete_task_definition(task):
 # iam
 
 
-def _create_lambda_exec_role():
+def create_lambda_exec_role():
     '''
     create lambda_exec_role that allowing lambda function to acess s3,
     sqs, start ec2 and register cloudwatch
@@ -298,7 +298,7 @@ def _get_role_arn(role_name):
         res = session.client('iam').get_role(RoleName=role_name)
     except ClientError as e:
         print(e)
-        print('Does not have role %s, make sure you have permission on creating iam role and run create_lambda_exec_role()', role_name)
+        print('Does not have role %s, make sure you have permission on creating iam role and run create-lambda-exec-role()', role_name)
 
     return res['Role']['Arn']
 
