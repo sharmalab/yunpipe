@@ -11,9 +11,11 @@ setup(name='cloud_pipe',
       install_requires=['boto3', 'Haikunator'],
       # scripts=['bin/wrap', 'bin/setup_pipe'],
       entry_points={
-          'console_scripts': ['wrap = cloud_pipe.scripts.wrap:main',
-                              'clean = cloud_pipe.pipeline.cleanup:main',
-                              'setup-pipe = cloud_pipe.scripts.setup_pipe:main']
+          'console_scripts': [
+              'wrap = cloud_pipe.scripts.wrap:main',
+              'clean-up = cloud_pipe.pipeline.cleanup:main',
+              'setup-pipe = cloud_pipe.scripts.setup_pipe:main',
+              'create-lambda-exec-role = cloud_pipe.scripts.setup_pipe: create_lambda_exec_role']
       },
       include_package_data=True,
       zip_safe=False)
