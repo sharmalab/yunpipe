@@ -254,13 +254,13 @@ def generate_image_info(alg_info, container_name):
     return alg_info
 
 
-def generate_all(alg, args, user):
+def generate_all(alg, args):
     '''
     '''
     wrapper(alg)
 
     path = join(CLOUD_PIPE_TMP_FOLDER, alg['name'])
-    container_name = generate_image(alg['name'], path, user)
+    container_name = generate_image(alg['name'], path, args.user)
 
     info = generate_image_info(alg, container_name)
 
@@ -304,11 +304,11 @@ if __name__ == '__main__':
         if not get_true_or_false('Do you want to continue? [y/n]:', True):
             exit(0)
 
-        generate_all(alg, args, user)
+        generate_all(alg, args)
 
     else:
         for file_name in args.files:
             with open(file_name, 'r') as data_file:
                 alg = json.load(data_file)
 
-            generate_all(alg, args, user)
+            generate_all(alg, args)
