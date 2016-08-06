@@ -18,7 +18,8 @@ def generate_dockerfile(system_name, container_name):
     generate the dockerfile content
     '''
     if system_name == 'ubuntu':
-        with open('../templates/ubuntu_wrapper', 'r') as myfile:
+        file_path = join(CLOUD_PIPE_TEMPLATES_FOLDER, 'ubuntu_wrapper.txt')
+        with open(file_path, 'r') as myfile:
             dockerfile = myfile.read()
     return dockerfile % {'container_name': container_name}
 
@@ -32,7 +33,7 @@ def generate_runscript(input_path, output_path, name, command):
     generate runscript that fetch information from sqs, handling
     download/upload file
     '''
-    file_path = join(CLOUD_PIPE_TEMPLATES_FOLDER, 'runscript_template')
+    file_path = join(CLOUD_PIPE_TEMPLATES_FOLDER, 'runscript_template.txt')
     with open(file_path, 'r') as myfile:
         script = myfile.read()
     return script % {'input': input_path, 'output': output_path, 'name': name, 'command': command}
@@ -206,8 +207,8 @@ def generate_image(name, folder_path, user='wangyx2005'):
     # PATH = '../algorithms/'
     # name = dockerfile_name.split('.')[0]
     tagged_name = user + '/' + name
-    BUILD_COMMAND = 'docker build -t %(name)s %(path)s/.' \
-        % {'name': name, 'path': folder_path}
+    BUILD_COMMAND = 'docker build -t %(name)s %(path)s' \
+        % {'name': name, 'path': join(folder_path, '.')}
     TAG_COMMAND = 'docker tag %(name)s %(tag)s' % {
         'tag': tagged_name, 'name': name}
     UPLOAD_COMMAND = 'docker push %(tag)s' % {'tag': tagged_name}
@@ -219,7 +220,7 @@ def generate_image(name, folder_path, user='wangyx2005'):
     call(UPLOAD_COMMAND.split())
 
     # remove the folder generated during the image generatation process
-    remove = 'rm -r ' + folder_name
+    remove = 'rm -r ' + folder_path
     # call(remove.split())
 
     return tagged_name
