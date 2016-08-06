@@ -4,7 +4,6 @@ import argparse
 import json
 
 from ..pipeline import set_pipe
-# from .pipeline.set_pipe import main
 from ..pipeline.task_config import get_task_credentials
 
 
