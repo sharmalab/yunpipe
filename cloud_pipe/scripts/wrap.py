@@ -1,14 +1,17 @@
 #!/usr/bin/env python
-
+import json
 import argparse
 
-from ..wrapper import *
+from ..wrapper import describe_algorithm
+from ..wrapper import generate_all
+from ..utils import get_true_or_false
 
 
 def main():
     DEFAULT_USER = 'wangyx2005'
 
-    parser = argparse.ArgumentParser(description='A tool to wrap your containers')
+    parser = argparse.ArgumentParser(
+        description='A tool to wrap your containers')
 
     parser.add_argument('-d', '--describe', action='store_true',
                         help='use command line editor to describe your algorithm')
@@ -34,7 +37,8 @@ def main():
         if args.show:
             print(json.dumps(alg, indent='    ', sort_keys=True))
 
-        if not get_true_or_false('Do you want to continue generate images? [y/n]:', True):
+        if not get_true_or_false(
+                'Do you want to continue generate images? [y/n]:', True):
             exit(0)
 
         generate_all(alg, args)
