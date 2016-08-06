@@ -8,6 +8,8 @@ from .. import CLOUD_PIPE_TEMPLATES_FOLDER
 from .. import CLOUD_PIPE_TMP_FOLDER
 from .. import CLOUD_PIPE_ALGORITHM_FOLDER
 from .. import create_folder
+from ..utils import get_int
+from ..utils import get_true_or_false
 
 
 SUPPORTED_SYSTEM = {'ubuntu'}
@@ -15,7 +17,19 @@ SUPPORTED_SYSTEM = {'ubuntu'}
 
 def generate_dockerfile(system_name, container_name):
     '''
-    generate the dockerfile content
+    generate the dockerfile content.
+
+    Based on the system which user's prebuild image, generate dockerfile
+    including adding run enviroment of runscript.py and add runscript.
+
+    :para system_name: the system name in which the docker image is built on
+    :tpye: string
+
+    :para container_name: user's algorithm container
+    :tpye: string
+
+    :return: the dockerfile content.
+    :rtype: string
     '''
     if system_name == 'ubuntu':
         file_path = join(CLOUD_PIPE_TEMPLATES_FOLDER, 'ubuntu_wrapper.txt')
@@ -31,7 +45,23 @@ def show_dockerfile(system_name, container_name):
 def generate_runscript(input_path, output_path, name, command):
     '''
     generate runscript that fetch information from sqs, handling
-    download/upload file
+    download/upload file and run script.
+
+    :para input_path: input folder
+    :type: string
+
+    :para output_path: output folder
+    :type: string
+
+    :para name: new docker image name
+    :type: string
+
+    :para command: run command of user's algorithm script
+    :type: string
+
+    :return: the runscript for runscript.py. Include fetching information,
+    download / upload file and run script.
+    :rtype: string
     '''
     file_path = join(CLOUD_PIPE_TEMPLATES_FOLDER, 'runscript_template.txt')
     with open(file_path, 'r') as myfile:
@@ -41,48 +71,6 @@ def generate_runscript(input_path, output_path, name, command):
 
 def show_runscript(input_path, output_path, name, command):
     print(generate_runscript(input_path, output_path, name, command))
-
-
-def get_true_or_false(message, default=False):
-    '''
-    transfer user input Y/n into True or False
-
-    :para message: input message should to user
-    :type: string
-
-    :para default: default value
-    '''
-    expected_response = {'y', 'Y', 'n', 'N', ''}
-    response = input(message)
-    while response not in expected_response:
-        response = input(message)
-
-    if response == 'Y' or response == 'y':
-        return True
-    elif response == 'N' or response == 'n':
-        return False
-    else:
-        return default
-
-
-def get_int(message, default):
-    '''
-    transfer user input to int numbers. Continue asking unless valid input.
-    If user omit the input and default is set to non-None, get default number instand.
-    '''
-    while True:
-        response = input(message)
-        if response == '':
-            if default is None:
-                print('Please input an integer value.')
-                continue
-            else:
-                return default
-        else:
-            try:
-                return int(response)
-            except ValueError:
-                print('Please input integer value.')
 
 
 def describe_algorithm():
@@ -155,9 +143,11 @@ def describe_algorithm():
 
 def wrapper(alg_info):
     '''
-    automatic generate dockerfile
-    para: a json object contains necessory information about algorithm
-    type: json
+    automatic generate dockerfile according to the information user provided.
+
+    :para alg_info: a json object contains necessory information about
+    algorithm
+    :type: json
     '''
     # generate runscript
     if alg_info['input_file_path'][-1] != '/':
@@ -171,9 +161,9 @@ def wrapper(alg_info):
 
     # generate runscript
     runscript = generate_runscript(alg_info['input_file_path'], alg_info[
-                                    'output_file_path'], alg_info['name'],
-                                    alg_info['run_command'])
-    
+                                   'output_file_path'], alg_info['name'],
+                                   alg_info['run_command'])
+
     run_file = join(folder, 'runscript.py')
     with open(run_file, 'w+') as tmpfile:
         tmpfile.write(runscript)
@@ -194,19 +184,42 @@ def get_instance_type(alg_info):
     '''
     Based on the algorithm developer provided information, choose an
     apporperate ec2 instance_type
+
+    :para alg_info: a json object contains necessory information about
+    algorithm
+    :type: json
+
+    :rtype: sting of ec2 instance type
     '''
     # TODO: rewrite
     return 't2.micro'
 
 
-def generate_image(name, folder_path, user='wangyx2005'):
+def generate_image(name, folder_path, args):
     '''
-    build new docker image and upload, return new images
+    build new docker image and upload.
+
+    giver new docker image name and dockerfile, build new image, tagged with
+    user account and pushed to desired registry. Default registry is docker
+    hub, will support other registry soon.
+
+    :para name: new docker image name. Without tag and registry.
+    :type: string
+
+    :para folder_path: the path to tmp folder where stores dockerfiles.
+    path is ~/.cloud_pipe/tmp/name
+    :typr: string
+
+    :para args: command line arguments passed in from scripts.wrap, currently
+    only useful entry is user, will using registry soon
+    :type: argparser object
+
+    :rtpye: docker image with repo name
     '''
     # TODO: rewrite
     # PATH = '../algorithms/'
     # name = dockerfile_name.split('.')[0]
-    tagged_name = user + '/' + name
+    tagged_name = args.user + '/' + name
     BUILD_COMMAND = 'docker build -t %(name)s %(path)s' \
         % {'name': name, 'path': join(folder_path, '.')}
     TAG_COMMAND = 'docker tag %(name)s %(tag)s' % {
@@ -228,16 +241,16 @@ def generate_image(name, folder_path, user='wangyx2005'):
 
 def generate_image_info(alg_info, container_name):
     '''
-    generate wrapped image info for ecs task
-    para: alg_info:
-    type: json
+    generate wrapped image information for ecs task
 
-    para: container_name: access name of the wrapped container
-    type: string
+    :para alg_info: algorthm information user provided
+    :type: json
+
+    :para container_name: access name of the wrapped container
+    :type string
 
     rtype: json
     '''
-    # TODO:
     new_vars = []
     new_vars.append({'name': 'output_s3_name', 'required': True})
     new_vars.append({'name': 'sqs', 'required': True})
@@ -257,11 +270,20 @@ def generate_image_info(alg_info, container_name):
 
 def generate_all(alg, args):
     '''
+    generate dockerfile, build new image, upload to registry and generate
+    detailed information of the new image
+
+    :para alg: algorthm information user provided
+    :type: json
+
+    :para agrs: command line argument from script.wrap. args.user and 
+    args.registry
+    :type: argparser object
     '''
     wrapper(alg)
 
     path = join(CLOUD_PIPE_TMP_FOLDER, alg['name'])
-    container_name = generate_image(alg['name'], path, args.user)
+    container_name = generate_image(alg['name'], path, args)
 
     info = generate_image_info(alg, container_name)
 
