@@ -1,1 +1,1 @@
-include cloud_pipe/templates/*.txt
+include yunpipe/templates/*.txt
