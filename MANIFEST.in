@@ -1,1 +1,5 @@
+# include the license file
+include LICENSE.txt
+
+# include template files
 include yunpipe/templates/*.txt
