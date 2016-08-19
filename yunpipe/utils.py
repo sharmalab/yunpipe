@@ -1,5 +1,5 @@
 '''
-Utility functions for cloud_pipe
+Utility functions for yunpipe
 '''
 
 import os.path

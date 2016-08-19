@@ -4,11 +4,16 @@ from setuptools import setup, find_packages
 setup(name='yunpipe',
       version='0.0.3',
       description='An Automatic tool for setting up your image processing work flow on the cloud',
+
       url='https://github.com/wangyx2005/cloud_pipe.git',
+
       author='Yuxing Wang',
       author_email='wangyx2005@gmail.com',
+
       packages=find_packages(),
       install_requires=['boto3', 'Haikunator'],
+
+      license='Apache v2.0'
       # scripts=['bin/wrap', 'bin/setup_pipe'],
       entry_points={
           'console_scripts': [
