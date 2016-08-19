@@ -3,8 +3,8 @@ This is an automatic setup tool for setting up the data analysis pipeline on the
 
 This tool is developed on Python 3.5.1. Using this on previous versions of python 3 or python 2 has not been tested.
 
-Now cloud_pipe is on Pypi, and it supports pip. To install cloud_pipe,
-`pip install cloud_pipe`. After install cloud_pipe:
+Now yunpipe is on Pypi, and it supports pip. To install yunpipe,
+`pip install yunpipe`. After install yunpipe:
 
 To submit an algorithm or bring your analyze tool, use `wrap -d`. For more options, check:
 ```

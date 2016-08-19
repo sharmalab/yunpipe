@@ -85,7 +85,7 @@ The following is a sample work flow json file. It puts input files in container-
 }
 ```
 
-cloud_pipe also supports sequential work flow. All you need to do is to change value __"single_run"__ in __"process"."type"__ entry to __"sequence_run"__ and describe the list of algorithms in the sequence you want to run in the __"process"."algorithms"__ field.
+yunpipe also supports sequential work flow. All you need to do is to change value __"single_run"__ in __"process"."type"__ entry to __"sequence_run"__ and describe the list of algorithms in the sequence you want to run in the __"process"."algorithms"__ field.
 
 
 #### Run your work flow
@@ -94,11 +94,11 @@ Once a JSon file of your work flow description is generated, you can run your wo
 setup-pipe -f work-flow-json
 ``` 
 
-cloud_pipe will try to find your AWS login info from environment variables, then shared credential file ~/.aws folder, which is the aws sdk default location. If AWS login is not found, cloud_pipe will ask your aws credentials and configs then stored in ~/.aws folder.
+yunpipe will try to find your AWS login info from environment variables, then shared credential file ~/.aws folder, which is the aws sdk default location. If AWS login is not found, yunpipe will ask your aws credentials and configs then stored in ~/.aws folder.
 
 We suggested not using __-uu__ or __--use_user_credential__ flag. If using such flag, ecs tasks will use user's credential to run and user's credential will be displayed as plaintext in ecs task definition, which might cause security problem. We suggest creating a iam user with permissions only to access sqs and s3 and using it's credential.
 
-If you are not using __-uu__ or __--use_user_credential__ flag, cloud_pipe will check ~/.cloud_pipe/task file for credentials, if cloud_pipe failed to find it, it will ask you for such informations and stored in ~/.cloud_pipe/task file.
+If you are not using __-uu__ or __--use_user_credential__ flag, yunpipe will check ~/.yunpipe/task file for credentials, if yunpipe failed to find it, it will ask you for such informations and stored in ~/.yunpipe/task file.
 
 When the set up is finished, you will receive the following message. You can start uploading your input files and letting cloud handle the rest.
 ```

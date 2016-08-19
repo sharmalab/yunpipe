@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 
 setup(name='yunpipe',
-      version='0.0.3',
+      version='0.0.4',
       description='An Automatic tool for setting up your image processing work flow on the cloud',
 
       url='https://github.com/wangyx2005/cloud_pipe.git',
