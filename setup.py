@@ -13,14 +13,14 @@ setup(name='yunpipe',
       packages=find_packages(),
       install_requires=['boto3', 'Haikunator'],
 
-      license='Apache v2.0'
+      license='Apache v2.0',
       # scripts=['bin/wrap', 'bin/setup_pipe'],
       entry_points={
           'console_scripts': [
               'wrap = yunpipe.scripts.wrap:main',
               'clean-up = yunpipe.pipeline.cleanup:main',
               'setup-pipe = yunpipe.scripts.setup_pipe:main',
-              'create-lambda-exec-role = yunpipe.scripts.setup_pipe: create_lambda_exec_role']
+              'create-lambda-exec-role = yunpipe.pipeline.set_pipe: create_lambda_exec_role']
       },
       include_package_data=True,
       zip_safe=False)
