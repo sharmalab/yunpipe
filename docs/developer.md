@@ -4,23 +4,23 @@ All you need to do is to have your algorithm containerized and run `wrap`
 
 
 #### Using command line editor
-cloud_pipe offers an command line editor to describe your algorithm. Use `wrap --describe --show --user your-docker-account` or `wrap -ds -u your-docker-account`. A interactive command shell will pop up to help you describe your algorithm. For detailed explanation of each entry, check detailed explanation of algorithm entries section.
+yunpipe offers an command line editor to describe your algorithm. Use `wrap --describe --show --user your-docker-account` or `wrap -ds -u your-docker-account`. A interactive command shell will pop up to help you describe your algorithm. For detailed explanation of each entry, check detailed explanation of algorithm entries section.
 
-wrap.pic
+![qa_style_wrap](https://github.com/wangyx2005/yunpipe/blob/master/docs/pic/wrap.png)
 
 After you finish describe your algorithm, a json file is showed to let you verify every thing is correct. 
 
-json.pic
+![output json](https://github.com/wangyx2005/yunpipe/blob/master/docs/pic/json.png)
 
-Once you confirm everything is correct, cloud_pipe will build a new image and upload to your docker hub account. Make sure you have already sign up and sign in you docker hub account.
-At the same time, a more detailed json file describe your algorithm will be generated and stored in ~/.cloud_pipe/algorithms folder under your algorithm name for algorithm users to use locally. 
+Once you confirm everything is correct, yunpipe will build a new image and upload to your docker hub account. Make sure you have already sign up and sign in you docker hub account.
+At the same time, a more detailed json file describe your algorithm will be generated and stored in ~/.yunpipe/algorithms folder under your algorithm name for algorithm users to use locally. 
 
 #### Use pre-prepared json file
-cloud_pipe provides options using pre-prepared json file directly. use
+yunpipe provides options using pre-prepared json file directly. use
 ```
 wrap --files list-of-json-files --user your-docker-hub-account
 ```
-cloud_pipe will build new images based on those files and upload to your docker hub account. At the same time, more detailed json files describe your algorithms will be generated and stored in ~/.cloud_pipe/algorithms folder under your algorithm name for algorithm users to use locally. 
+yunpipe will build new images based on those files and upload to your docker hub account. At the same time, more detailed json files describe your algorithms will be generated and stored in ~/.yunpipe/algorithms folder under your algorithm name for algorithm users to use locally. 
 
 
 ##### Prepare your json file
@@ -78,5 +78,5 @@ If you prefer,  your algorithm json file directly. Here is an example of the jso
 
 We will add a registry option to allow people upload images to other registries like amazon container registry.
 
-Right now, sharing algorithm between users requires sharing corresponding json files in ~/.cloud_pipe/algorithms as well.
+Right now, sharing algorithm between users requires sharing corresponding json files in ~/.yunpipe/algorithms as well.
 We are working on to set up a database to enable developers to save the algorithm json file remotely to make it easy for users to use their algorithms
