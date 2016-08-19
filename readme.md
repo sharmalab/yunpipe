@@ -3,7 +3,7 @@ cloud_pipe is an automatic setup tool for setting up the data analysis pipeline 
 Now cloud_pipe is on Pypi, and it supports pip. The latest version is v0.0.3. To install yunpipe, use pip.
 ```
 pip install yunpipe
-```. 
+``` 
 
 After install yunpipe:
 
