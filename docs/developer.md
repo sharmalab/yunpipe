@@ -6,11 +6,11 @@ All you need to do is to have your algorithm containerized and run `wrap`
 #### Using command line editor
 yunpipe offers an command line editor to describe your algorithm. Use `wrap --describe --show --user your-docker-account` or `wrap -ds -u your-docker-account`. A interactive command shell will pop up to help you describe your algorithm. For detailed explanation of each entry, check detailed explanation of algorithm entries section.
 
-![qa_style_wrap](https://github.com/wangyx2005/yunpipe/blob/master/docs/pic/wrap.png)
+![qa_style_wrap](https://github.com/wangyx2005/yunpipe/blob/master/docs/pic/wrap.png?raw=true)
 
 After you finish describe your algorithm, a json file is showed to let you verify every thing is correct. 
 
-![output json](https://github.com/wangyx2005/yunpipe/blob/master/docs/pic/json.png)
+![output json](https://github.com/wangyx2005/yunpipe/blob/master/docs/pic/json.png?raw=true)
 
 Once you confirm everything is correct, yunpipe will build a new image and upload to your docker hub account. Make sure you have already sign up and sign in you docker hub account.
 At the same time, a more detailed json file describe your algorithm will be generated and stored in ~/.yunpipe/algorithms folder under your algorithm name for algorithm users to use locally. 
