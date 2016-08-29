@@ -11,4 +11,4 @@ To submit an algorithm or bring your analyze tool, use `wrap -ds`. For more opti
 
 To run single algorithm or deploy you analytical work flow, use `setup-pipe -f your-workflow-json`. For more options, check: `setup-pipe --help`
 
-For documentation, see [yunpipe documentation](http://cloud-pipe.readthedocs.io/en/latest/)
+For documentation, see [yunpipe documentation](http://yunpipe.readthedocs.io/en/latest/)
