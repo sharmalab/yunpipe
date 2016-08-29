@@ -22,7 +22,7 @@ In the area of imaging processing, researchers use various different algorithms 
 
 With the information of the algorithm and the containerized algorithm, a new container with a running script is generated. This container is the actual container when the algorithm is used. The running script handles all the hassles to run the processing job: retrieving input information from SQS, downloading input object from S3 bucket, putting input object to correct location, running the processing job, uploading the result object to designed location and managing logs throughout the whole process.
 
-
+![wrap setup](https://github.com/wangyx2005/yunpipe/blob/master/docs/pic/wrap-setup.png?raw=true)
 
 
 ### Run
@@ -34,7 +34,11 @@ For each single algorithm processing, a microservice is built around it on AWS:
 - a message queue, we use [Amazon Simple Queue Service (SQS)](https://aws.amazon.com/sqs/) in the current version, is used to hold the information about the input files.
 - a ecs task is used to perform the actual algorithm processing on the cloud. It retrieve the input file information from the message queue, download from sources and process the files. Once it is finished, the resulting file is upload to another s3 bucket and the ecs task is terminated.
 
-picture
+![single run](https://github.com/wangyx2005/yunpipe/blob/master/docs/pic/single_run.PNG?raw=true)
+
+Yunpipe also supports sequential analysis pipeline. The intermediate data is also stored in s3 bucket, which is also used as the launch event for the next analysis step.
+
+![sequential run](https://github.com/wangyx2005/yunpipe/blob/master/docs/pic/sequence_run.PNG?raw=true)
 
 As each task is run on specific type of EC2 instance, the default ECS scheduler does not fit our need.
 In our current version, lambda function is also in charge of checking resources to start ecs task, launch ec2 instance into ecs cluster if needed and register ec2 on cloudwatch for shutdown. This is not very efficient. In our future version, a customer scheduler will be added the substitute that part in lambda function. 
