@@ -1,6 +1,6 @@
-cloud_pipe is an automatic setup tool for setting up the data analysis pipeline on the Amazon Web Services (AWS). It provides an easy to deploy, use and scale your data analysis algorithm and work flow on the cloud as well as sharing between colleges and institutions. It is developed in Python 3 using boto, the AWS SDK for Python.
+yunpipe is an automatic setup tool for setting up the data analysis pipeline on the Amazon Web Services (AWS). It provides an easy to deploy, use and scale your data analysis algorithm and work flow on the cloud as well as sharing between colleges and institutions. It is developed in Python 3 using boto, the AWS SDK for Python.
 
-Now cloud_pipe is on Pypi, and it supports pip. The latest version is v0.0.3. To install yunpipe, use pip.
+Now yunpipe is on Pypi, and it supports pip. The latest version is v0.0.3. To install yunpipe, use pip.
 ```
 pip install yunpipe
 ``` 
