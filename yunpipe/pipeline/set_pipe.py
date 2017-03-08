@@ -89,10 +89,11 @@ def _is_sqs_exist(name):
     type: string
     '''
     queues = session.client('sqs').list_queues()
-    for queue in queues['QueueUrls']:
-        if name in queue:
-            if name == queue.split('/')[-1]:
-                return True
+    if 'QueueUrls' in queues:
+        for queue in queues['QueueUrls']:
+            if name in queue:
+                if name == queue.split('/')[-1]:
+                    return True
     return False
 
 
