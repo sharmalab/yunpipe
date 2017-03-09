@@ -45,12 +45,24 @@ def get_instances_arns(cluster):
 
     return arns
 
+def _is_cluster_exist(cluster_name):
+    response = ecs.describe_clusters(clusters=[cluster_name,])
+    bool exists = False
+    if 'clusters' in response:
+        for entry in response['clusters']:
+            if entry['clusterName'] == cluster_name:
+                exists = True
+                break
+    return exists
 
 def start_task(cluster, memory):
     '''
     given a cluster and task required memory, return true if successfully start
     task.
     '''
+    if not _is_cluster_exist(cluster):
+        res = ecs.create_cluster(clusterName=cluster)
+        
     global ec2InstanceId
     arns = get_instances_arns(cluster)
     ins = ecs.describe_container_instances(
