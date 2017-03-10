@@ -46,14 +46,37 @@ def get_instances_arns(cluster):
     return arns
 
 def _is_cluster_exist(cluster_name):
-    response = ecs.describe_clusters(clusters=[cluster_name,]) # Test this; might throw exception; if so, use ListClusters function
-    bool exists = False
-    if response is not None && 'clusters' in response:
+    """Test if cluster with the name :param cluster_name:
+    exists.
+    The 'default' cluster always exists as an entry in the
+    response. Must check if the status is 'ACTIVE' or 'INACTIVE'
+    for actual existence.
+    """
+    response = ecs.describe_clusters(clusters=[cluster_name,]) # Test this; might throw exception; if so, use ListClusters function 
+    exists = False
+    if response is not None and 'clusters' in response:
         for entry in response['clusters']:
-            if entry['clusterName'] == cluster_name:
+            if entry['clusterName'] == cluster_name and entry['status'] == 'ACTIVE':
                 exists = True
                 break
     return exists
+
+def is_cluster_exist(cluster_name):
+    """Test if a cluster with the name :param cluster_name:
+    exists.
+    The response contains the ARNs of all created clusters 
+    (by region) in the user's account 
+    """    
+    response = ecs.list_clusters()
+    for clusterArn in response['clusterArns']:
+        if (clusterArn.split(":")[-1]).split("/")[-1] == 'default':
+            return True
+    while response.get('nextToken', None) is not None:
+        response = ecs.list_clusters(nextToken=response['nextToken'])
+        for clusterArn in response['clusterArns']:
+            if (clusterArn.split(":")[-1]).split("/")[-1] == 'default':
+                return True
+    return False
 
 def start_task(cluster, memory):
     '''
@@ -66,7 +89,7 @@ def start_task(cluster, memory):
     global ec2InstanceId
     ec2_started = False
     arns = get_instances_arns(cluster)
-    if not arns:
+    if arns:
         ins = ecs.describe_container_instances(
             cluster=cluster, containerInstances=arns)['containerInstances']
         for inc in ins:
