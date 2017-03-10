@@ -46,9 +46,9 @@ def get_instances_arns(cluster):
     return arns
 
 def _is_cluster_exist(cluster_name):
-    response = ecs.describe_clusters(clusters=[cluster_name,])
+    response = ecs.describe_clusters(clusters=[cluster_name,]) # Test this; might throw exception; if so, use ListClusters function
     bool exists = False
-    if 'clusters' in response:
+    if response is not None && 'clusters' in response:
         for entry in response['clusters']:
             if entry['clusterName'] == cluster_name:
                 exists = True
@@ -64,24 +64,25 @@ def start_task(cluster, memory):
         res = ecs.create_cluster(clusterName=cluster)
         
     global ec2InstanceId
-    arns = get_instances_arns(cluster)
-    ins = ecs.describe_container_instances(
-        cluster=cluster, containerInstances=arns)['containerInstances']
     ec2_started = False
-    for inc in ins:
-        info = ec2.describe_instances(InstanceIds=[inc['ec2InstanceId']])
-        if info['Reservations'][0]['Instances'][0]['InstanceType'] != '%(instance_type)s':
-            instances.add(inc['containerInstanceArn'])
-        else:
-            if inc['ec2InstanceId'] == ec2InstanceId:
-                ec2_started = True
-            if inc['remainingResources'] >= memory:
-                res = ecs.start_task(
-                    taskDefinition='%(task_name)s',
-                    containerInstances=[inc['containerInstanceArn']])
-                if len(res['failures']) == 0:
-                    print('start tast at {}'.format(inc['containerInstanceArn']))
-                    return True
+    arns = get_instances_arns(cluster)
+    if not arns:
+        ins = ecs.describe_container_instances(
+            cluster=cluster, containerInstances=arns)['containerInstances']
+        for inc in ins:
+            info = ec2.describe_instances(InstanceIds=[inc['ec2InstanceId']])
+            if info['Reservations'][0]['Instances'][0]['InstanceType'] != '%(instance_type)s':
+                instances.add(inc['containerInstanceArn'])
+            else:
+                if inc['ec2InstanceId'] == ec2InstanceId:
+                    ec2_started = True
+                if inc['remainingResources'] >= memory:
+                    res = ecs.start_task(
+                        taskDefinition='%(task_name)s',
+                        containerInstances=[inc['containerInstanceArn']])
+                    if len(res['failures']) == 0:
+                        print('start tast at {}'.format(inc['containerInstanceArn']))
+                        return True
     if ec2_started:
         ec2InstanceId = create_ec2()
         print('created ec2 has been used, start new ec2')
@@ -102,7 +103,7 @@ def create_ec2():
                                      SubnetId='%(subnet_id)s',
                                      IamInstanceProfile={'Name': '%(iam_name)s'})
 
-    # registe instances for cloudwatch shutdown
+    # register instances for cloudwatch shutdown
     alarm_name = instances[0].id + '-shutdown'
     alarm_act = ['arn:aws:swf:%(region)s:%(account_id)s:action/actions/AWS_EC2.InstanceId.Terminate/1.0']
     dimension = [{"Name": "InstanceId", "Value": instances[0].id}]
