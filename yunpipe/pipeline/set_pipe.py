@@ -396,8 +396,9 @@ def get_image_info(name):
     return info
 
 def _get_ecs_optimized_AMI_id():
-    response = response = ec2.describe_images(Owners=['amazon',],\
-                                              Filters=[{'Name':'name','Values':['amzn-ami-2016.09.f-amazon-ecs-optimized',]},]) 
+    ec2 = session.client('ec2')
+    response = ec2.describe_images(Owners=['amazon',],\
+                                   Filters=[{'Name':'name','Values':['amzn-ami-2016.09.f-amazon-ecs-optimized',]},]) 
     ami_id = response['Images'][0]['ImageId']
     return ami_id
 
