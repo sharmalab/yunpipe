@@ -395,6 +395,11 @@ def get_image_info(name):
         info = image(json.load(tmpfile))
     return info
 
+def _get_ecs_optimized_AMI_id():
+    response = response = ec2.describe_images(Owners=['amazon',],\
+                                              Filters=[{'Name':'name','Values':['amzn-ami-2016.09.f-amazon-ecs-optimized',]},]) 
+    ami_id = response['Images'][0]['ImageId']
+    return ami_id
 
 def _get_sys_info(key_pair, account_id, region):
     '''
@@ -405,11 +410,12 @@ def _get_sys_info(key_pair, account_id, region):
     rtype dict
     '''
     # TODO: need rewrite this function
+    # Look into create_instances(**kwargs) API
     info = {}
-    info['image_id'] = 'ami-8f7687e2'
-    info['iam_name'] = 'ecsInstanceRole'
-    info['subnet_id'] = 'subnet-d32725fb'
-    info['security_group'] = 'default'
+    info['image_id'] = _get_ecs_optimized_AMI_id()
+    info['iam_name'] = 'ecsInstanceRole' # FIX
+    info['subnet_id'] = 'subnet-d32725fb' # FIX
+    info['security_group'] = 'default' # FIX
     info['key_pair'] = key_pair
     info['region'] = region
     info['account_id'] = account_id
