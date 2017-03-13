@@ -123,7 +123,7 @@ def create_ec2():
                                      KeyName='%(key_pair)s', MaxCount=1,
                                      # SecurityGroups=['%(security_group)s'],
                                      InstanceType='%(instance_type)s',
-                                     #SubnetId='%(subnet_id)s',
+                                     SubnetId='%(subnet_id)s',
                                      IamInstanceProfile={'Name': '%(iam_name)s'})
 
     # register instances for cloudwatch shutdown
