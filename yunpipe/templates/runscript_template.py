@@ -141,12 +141,14 @@ def run_program(input_file):
 
     file_name = input_file.split('/')[-1]
     result_file = OUTPUT_PATH + 'Result-' + NAME + '-' + file_name
+    output_file_specified = True
 
     run_command = command.split()
     for i in range(len(run_command)):
         if run_command[i] == '$input':
             run_command[i] = input_file
         if run_command[i] == '$output':
+            output_file_specified = False
             run_command[i] = result_file
 
     # with open(input_file, 'r') as f:
@@ -159,8 +161,10 @@ def run_program(input_file):
     if os.path.isdir(result_file):
         file_name = 'Result-' + NAME + '-' + file_name.split('.')[0] + '.zip'
         call(['zip', '-rv9', file_name, result_file])
-    else:
+    elif not output_file_specified:
         file_name = result_file
+    else:
+        file_name = run_command[i]
     return file_name
 
 
@@ -174,8 +178,8 @@ def upload_file(file, input_file):
         logger.warn(err)
     except Exception as err:
         logger.debug(traceback.format_exc())
-        logger.error('Unexpected error happend will upload file')
-        logger.err(err)
+        logger.error('Unexpected error happened while uploading file to output S3 bucket')
+        logger.error(err)
 
 
 if __name__ == '__main__':

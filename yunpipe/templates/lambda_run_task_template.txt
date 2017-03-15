@@ -104,7 +104,7 @@ def start_task(cluster, memory):
                         taskDefinition='%(task_name)s',
                         containerInstances=[inc['containerInstanceArn']])
                     if len(res['failures']) == 0:
-                        print('start tast at {}'.format(inc['containerInstanceArn']))
+                        print('start task at {}'.format(inc['containerInstanceArn']))
                         return True
     if ec2_started:
         ec2InstanceId = create_ec2()
@@ -154,7 +154,7 @@ def lambda_handler(event, context):
     print('run time {}'.format((time() - start_time)))
     # start task at given type of instance
     if not start_task('default', %(memory)s):
-        print('firest check run time {}'.format((time() - start_time)))
+        print('first check run time {}'.format((time() - start_time)))
         ec2InstanceId = create_ec2()
         print('run time {}'.format((time() - start_time)))
 

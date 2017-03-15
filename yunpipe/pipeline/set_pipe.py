@@ -395,7 +395,7 @@ def get_image_info(name):
         info = image(json.load(tmpfile))
     return info
 
-def _get_subnet_id();
+def _get_subnet_id():
     from random import randint
     ec2 = session.client('ec2')
     response = ec2.describe_subnets()
@@ -405,7 +405,7 @@ def _get_subnet_id();
         subnet_id = subnets[randint(0,len(subnets)-1)]['SubnetId']
     else:
         pass
-        # ec2.create_vpc(), ec2.create_subnet()
+        # FIXME:ec2.create_vpc(), ec2.create_subnet()
     return subnet_id
     
 def _get_ecs_optimized_AMI_id():
@@ -428,8 +428,8 @@ def _get_sys_info(key_pair, account_id, region):
     info = {}
     info['image_id'] = _get_ecs_optimized_AMI_id()
     info['iam_name'] = 'ecsInstanceRole' # FIX
-    info['subnet_id'] = _get_subnet_id() # FIX
-    info['security_group'] = 'default' # FIX
+    info['subnet_id'] = _get_subnet_id() 
+    info['security_group'] = 'default' # FIXME
     info['key_pair'] = key_pair
     info['region'] = region
     info['account_id'] = account_id
