@@ -158,13 +158,18 @@ def run_program(input_file):
     call(run_command)
 
     # check if need to zip
-    if os.path.isdir(result_file):
-        file_name = 'Result-' + NAME + '-' + file_name.split('.')[0] + '.zip'
-        call(['zip', '-rv9', file_name, result_file])
-    elif not output_file_specified:
-        file_name = result_file
+    if not output_file_specified:
+        if os.path.isdir(result_file):
+            file_name = 'Result-' + NAME + '-' + file_name.split('.')[0] + '.zip'
+            call(['zip', '-rv9', file_name, result_file])
+        else:
+            file_name = result_file
     else:
-        file_name = run_command[i]
+        if os.path.isdir(run_command[i]):
+            file_name = 'Result-' + NAME + '-' + file_name.split('.')[0] + '.zip'
+            call(['zip', '-rv9', file_name, run_command[i]])
+        else:
+            file_name = run_command[i]
     return file_name
 
 
