@@ -7,7 +7,7 @@
                 "lambda:invokeFunction",
                 "sqs:SendMessage",
                 "ec2:Describe*",
-                "ec2:StartInsatnces",
+                "ec2:StartInstances",
                 "ecs:RunTask"
             ],
             "Effect": "Allow",
