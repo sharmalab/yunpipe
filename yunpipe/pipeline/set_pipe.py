@@ -149,13 +149,15 @@ def _is_s3_exist(name):
     return False
 
 
-def _get_or_create_s3(name):
+def _get_or_create_s3(name, region):
     '''
     create s3 bucket if not existed
     rtype: string
     '''
     if not _is_s3_exist(name):
-        session.client('s3').create_bucket(Bucket=name)
+        session.client('s3').create_bucket(Bucket=name, CreateBucketConfiguration=None \
+                                                        if region == 'us-east-1' \
+                                                         else {'LocationConstraint': region})
         print('create s3 bucket %s.' % name)
     else:
         print('find s3 bucket %s.' % name)
@@ -524,10 +526,10 @@ def pipeline_setup(request, sys_info, clean, credentials):
     clean['lambda'].append(lambda_arn)
 
     # set s3
-    input_s3 = _get_or_create_s3(request['input_s3_name'])
+    input_s3 = _get_or_create_s3(request['input_s3_name'], sys_info['region'])
     _set_event(input_s3, lambda_arn, 'lambda')
 
-    output_s3 = _get_or_create_s3(request['output_s3_name'])
+    output_s3 = _get_or_create_s3(request['output_s3_name'], sys_info['region'])
     clean['s3'].append(input_s3)
     clean['s3'].append(output_s3)
 
