@@ -83,8 +83,8 @@ def start_task(cluster, memory):
     given a cluster and task required memory, return true if successfully start
     task.
     '''
-    if not _is_cluster_exist(cluster):
-        res = ecs.create_cluster(clusterName=cluster)
+    #if not is_cluster_exist(cluster):
+        #res = ecs.create_cluster(clusterName=cluster)
         
     global ec2InstanceId
     ec2_started = False
