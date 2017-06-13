@@ -14,4 +14,6 @@ WORKDIR /ecs_container
 
 COPY runscript.py runscript.py
 
+ENTRYPOINT []
+
 CMD python3 runscript.py

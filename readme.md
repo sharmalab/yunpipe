@@ -2,7 +2,7 @@ yunpipe is an automatic setup tool for setting up the data analysis pipeline on 
 
 Now yunpipe is on Pypi, and it supports pip. The latest version is v0.0.3. To install yunpipe, use pip.
 ```
-pip install yunpipe
+pip install yunpipe2
 ``` 
 
 After install yunpipe:

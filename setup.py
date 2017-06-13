@@ -1,14 +1,17 @@
 from setuptools import setup, find_packages
 
 
-setup(name='yunpipe',
-      version='0.0.4',
+setup(name='yunpipe2',
+      version='0.0.0',
       description='An Automatic tool for setting up your image processing work flow on the cloud',
 
-      url='https://github.com/wangyx2005/yunpipe.git',
+      url='https://github.com/nujhedtozu/yunpipe',
 
       author='Yuxing Wang',
       author_email='wangyx2005@gmail.com',
+    
+      maintainer='Deh-Jun Tzou',
+      maintainer_email='junior.tzou@gmail.com',
 
       packages=find_packages(),
       install_requires=['boto3', 'Haikunator'],

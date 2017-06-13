@@ -89,10 +89,11 @@ def _is_sqs_exist(name):
     type: string
     '''
     queues = session.client('sqs').list_queues()
-    for queue in queues['QueueUrls']:
-        if name in queue:
-            if name == queue.split('/')[-1]:
-                return True
+    if 'QueueUrls' in queues:
+        for queue in queues['QueueUrls']:
+            if name in queue:
+                if name == queue.split('/')[-1]:
+                    return True
     return False
 
 
@@ -148,13 +149,15 @@ def _is_s3_exist(name):
     return False
 
 
-def _get_or_create_s3(name):
+def _get_or_create_s3(name, region):
     '''
     create s3 bucket if not existed
     rtype: string
     '''
     if not _is_s3_exist(name):
-        session.client('s3').create_bucket(Bucket=name)
+        session.client('s3').create_bucket(Bucket=name, CreateBucketConfiguration=None \
+                                                        if region == 'us-east-1' \
+                                                         else {'LocationConstraint': region})
         print('create s3 bucket %s.' % name)
     else:
         print('find s3 bucket %s.' % name)
@@ -394,6 +397,25 @@ def get_image_info(name):
         info = image(json.load(tmpfile))
     return info
 
+def _get_subnet_id():
+    from random import randint
+    ec2 = session.client('ec2')
+    response = ec2.describe_subnets()
+    subnet_id = ""
+    subnets = response['Subnets']
+    if subnets:
+        subnet_id = subnets[randint(0,len(subnets)-1)]['SubnetId']
+    else:
+        pass
+        # FIXME:ec2.create_vpc(), ec2.create_subnet()
+    return subnet_id
+    
+def _get_ecs_optimized_AMI_id():
+    ec2 = session.client('ec2')
+    response = ec2.describe_images(Owners=['amazon',],\
+                                   Filters=[{'Name':'name','Values':['amzn-ami-2016.09.f-amazon-ecs-optimized',]},]) 
+    ami_id = response['Images'][0]['ImageId']
+    return ami_id
 
 def _get_sys_info(key_pair, account_id, region):
     '''
@@ -404,11 +426,12 @@ def _get_sys_info(key_pair, account_id, region):
     rtype dict
     '''
     # TODO: need rewrite this function
+    # Look into create_instances(**kwargs) API
     info = {}
-    info['image_id'] = 'ami-8f7687e2'
-    info['iam_name'] = 'ecsInstanceRole'
-    info['subnet_id'] = 'subnet-d32725fb'
-    info['security_group'] = 'default'
+    info['image_id'] = _get_ecs_optimized_AMI_id()
+    info['iam_name'] = 'ecsInstanceRole' # FIX
+    info['subnet_id'] = _get_subnet_id() 
+    info['security_group'] = 'default' # FIXME
     info['key_pair'] = key_pair
     info['region'] = region
     info['account_id'] = account_id
@@ -503,10 +526,10 @@ def pipeline_setup(request, sys_info, clean, credentials):
     clean['lambda'].append(lambda_arn)
 
     # set s3
-    input_s3 = _get_or_create_s3(request['input_s3_name'])
+    input_s3 = _get_or_create_s3(request['input_s3_name'], sys_info['region'])
     _set_event(input_s3, lambda_arn, 'lambda')
 
-    output_s3 = _get_or_create_s3(request['output_s3_name'])
+    output_s3 = _get_or_create_s3(request['output_s3_name'], sys_info['region'])
     clean['s3'].append(input_s3)
     clean['s3'].append(output_s3)
 
